@@ -36,6 +36,9 @@ message CreateUserResponse {
 
 message UpdateUserRequest {
   int32 user_id = 1;
+  string full_name = 2;
+  string username = 3;
+  string email = 4;
 }
 
 message UpdateUserResponse {
