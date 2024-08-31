@@ -1,0 +1,35 @@
+spring:
+  # Database configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spring_grpc
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # Hibernate configuration
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Server port
+server:
+  port: 0
+
+# gRPC Server port
+grpc:
+  server:
+    port: 9090
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+  file:
+    name: logs/application.log
+  logback:
+    rolling policy:
+      max-file-size: 10MB
+      max-history: 1

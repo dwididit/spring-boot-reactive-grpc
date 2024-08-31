@@ -1,1 +1,5 @@
-spring.application.name=spring-boot-reactive-grpc
+spring:
+  application:
+    name: spring-boot-reactive-grpc
+  profiles:
+    active: dev
