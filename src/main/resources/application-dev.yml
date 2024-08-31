@@ -15,7 +15,7 @@ spring:
 
 # Server port
 server:
-  port: 0
+  port: 9091
 
 # gRPC Server port
 grpc:
