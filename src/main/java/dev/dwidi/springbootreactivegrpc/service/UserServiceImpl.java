@@ -66,59 +66,124 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void getUser(UserServiceProto.GetUserRequest request, StreamObserver<UserServiceProto.GetUserResponse> responseObserver) {
-        Optional<User> user = userRepository.findByUserId((long) request.getUserId());
-        if (user.isPresent()) {
-            User foundUser = user.get();
-            UserServiceProto.GetUserResponse response = UserServiceProto.GetUserResponse.newBuilder()
-                    .setUserId(foundUser.getUserId().intValue())
-                    .setUsername(foundUser.getUsername())
-                    .setFullName(foundUser.getFullName())
-                    .setEmail(foundUser.getEmail())
-                    .build();
-            responseObserver.onNext(response);
-        } else {
-            responseObserver.onError(new Exception("User not found"));
+        try {
+            // Fetch the user by ID
+            Optional<User> user = userRepository.findByUserId((long) request.getUserId());
+
+            if (user.isPresent()) {
+                User foundUser = user.get();
+                // Build the response
+                UserServiceProto.GetUserResponse response = UserServiceProto.GetUserResponse.newBuilder()
+                        .setUserId(foundUser.getUserId().intValue())
+                        .setUsername(foundUser.getUsername())
+                        .setFullName(foundUser.getFullName())
+                        .setEmail(foundUser.getEmail())
+                        .build();
+                // Send the response
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            } else {
+                // User not found, return an error
+                responseObserver.onError(
+                        Status.NOT_FOUND
+                                .withDescription("User not found with ID: " + request.getUserId())
+                                .asRuntimeException()
+                );
+            }
+        } catch (Exception e) {
+            // Handle any unexpected errors
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Unexpected error occurred: " + e.getMessage())
+                            .withCause(e)
+                            .asRuntimeException()
+            );
         }
-        responseObserver.onCompleted();
     }
+
 
     @Override
     public void updateUser(UserServiceProto.UpdateUserRequest request, StreamObserver<UserServiceProto.UpdateUserResponse> responseObserver) {
-        Optional<User> user = userRepository.findByUserId((long) request.getUserId());
-        if (user.isPresent()) {
-            User userToEdit = user.get();
-            userToEdit.setUsername(request.getUsername());
-            userToEdit.setFullName(request.getFullName());
-            userToEdit.setEmail(request.getEmail());
+        try {
+            // Fetch the user by ID
+            Optional<User> user = userRepository.findByUserId((long) request.getUserId());
 
-            // Build the response
-            UserServiceProto.UpdateUserResponse response = UserServiceProto.UpdateUserResponse.newBuilder()
-                    .setUserId(userToEdit.getUserId().intValue())
-                    .setUsername(userToEdit.getUsername())
-                    .setFullName(userToEdit.getFullName())
-                    .setEmail(userToEdit.getEmail())
-                    .build();
+            if (user.isPresent()) {
+                User userToEdit = user.get();
+                // Update user details
+                userToEdit.setUsername(request.getUsername());
+                userToEdit.setFullName(request.getFullName());
+                userToEdit.setEmail(request.getEmail());
 
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(new Exception("User not found"));
+                // Save updated user details
+                userRepository.save(userToEdit);
+
+                // Build the response
+                UserServiceProto.UpdateUserResponse response = UserServiceProto.UpdateUserResponse.newBuilder()
+                        .setUserId(userToEdit.getUserId().intValue())
+                        .setUsername(userToEdit.getUsername())
+                        .setFullName(userToEdit.getFullName())
+                        .setEmail(userToEdit.getEmail())
+                        .build();
+
+                // Send the response
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            } else {
+                // User not found, return an error
+                responseObserver.onError(
+                        Status.NOT_FOUND
+                                .withDescription("User not found with ID: " + request.getUserId())
+                                .asRuntimeException()
+                );
+            }
+        } catch (Exception e) {
+            // Handle any unexpected errors
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Unexpected error occurred: " + e.getMessage())
+                            .withCause(e)
+                            .asRuntimeException()
+            );
         }
     }
+
 
     @Override
     public void deleteUser(UserServiceProto.DeleteUserRequest request, StreamObserver<UserServiceProto.DeleteUserResponse> responseObserver) {
-        Optional<User> user = userRepository.findByUserId((long) request.getUserId());
-        if (user.isPresent()) {
-            userRepository.deleteById(String.valueOf((long) request.getUserId()));
-            UserServiceProto.DeleteUserResponse response = UserServiceProto.DeleteUserResponse.newBuilder()
-                   .setUserId(request.getUserId())
-                   .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(new Exception("User not found"));
+        try {
+            // Fetch the user by ID
+            Optional<User> user = userRepository.findByUserId((long) request.getUserId());
+
+            if (user.isPresent()) {
+                // Delete the user by ID
+                userRepository.deleteById(String.valueOf(user.get().getUserId()));
+
+                // Build the response
+                UserServiceProto.DeleteUserResponse response = UserServiceProto.DeleteUserResponse.newBuilder()
+                        .setUserId(request.getUserId())
+                        .build();
+
+                // Send the response
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            } else {
+                // User not found, return an error
+                responseObserver.onError(
+                        Status.NOT_FOUND
+                                .withDescription("User not found with ID: " + request.getUserId())
+                                .asRuntimeException()
+                );
+            }
+        } catch (Exception e) {
+            // Handle any unexpected errors
+            responseObserver.onError(
+                    Status.INTERNAL
+                            .withDescription("Unexpected error occurred: " + e.getMessage())
+                            .withCause(e)
+                            .asRuntimeException()
+            );
         }
-        responseObserver.onCompleted();
     }
+
 }
