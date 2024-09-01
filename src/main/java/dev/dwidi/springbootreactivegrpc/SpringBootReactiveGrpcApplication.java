@@ -1,5 +1,6 @@
 package dev.dwidi.springbootreactivegrpc;
 
+import dev.dwidi.springbootreactivegrpc.config.LoggingInterceptor;
 import dev.dwidi.springbootreactivegrpc.repository.UserRepository;
 import dev.dwidi.springbootreactivegrpc.service.UserServiceImpl;
 import io.grpc.Server;
@@ -26,6 +27,7 @@ public class SpringBootReactiveGrpcApplication {
             Server server = ServerBuilder.forPort(9090)
                     .addService(new UserServiceImpl(userRepository))
                     .addService(ProtoReflectionService.newInstance())
+                    .intercept(new LoggingInterceptor())
                     .build();
 
             logger.info("Starting gRPC server...");
